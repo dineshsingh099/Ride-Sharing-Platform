@@ -1,12 +1,19 @@
+import { validationResult } from "express-validator";
 import userModel from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import BlacklistToken from "../models/blacklistToken.js";
+import { extractToken } from "../utils/extractToken.js";
+import BlacklistToken from "../models/blacklistToken.js"
+
 
 export async function UserRegister(req, res) {
 	try {
-		const { name, email, phone, password } = req.body;
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			return res.status(400).json({ errors: errors.array() });
+		}
 
+		const { name, email, phone, password } = req.body;
 		if (!name || !email || !phone || !password) {
 			return res.status(400).json({ message: "All fields are required" });
 		}
@@ -14,19 +21,21 @@ export async function UserRegister(req, res) {
 		const existingUser = await userModel.findOne({
 			$or: [{ email }, { phone }],
 		});
-
-		if (existingUser) {
+		if (existingUser)
 			return res.status(409).json({ message: "User already exists" });
-		}
 
 		const hashedPassword = await bcrypt.hash(password, 10);
-
 		const user = await userModel.create({
 			name,
 			email,
 			phone,
 			password: hashedPassword,
 		});
+
+		if (!process.env.JWT_SECRET) {
+			console.error("JWT_SECRET missing");
+			return res.status(500).json({ message: "Server misconfiguration" });
+		}
 
 		const token = jwt.sign(
 			{ id: user._id.toString(), role: "user" },
@@ -51,21 +60,23 @@ export async function UserRegister(req, res) {
 			},
 		});
 	} catch (error) {
+		console.error("UserRegister error:", error);
 		return res.status(500).json({ message: "Internal server error" });
 	}
 }
 
 export async function UserLogin(req, res) {
 	try {
-		const { email, phone, password } = req.body;
-
-		if ((!email && !phone) || !password) {
-			return res
-				.status(400)
-				.json({ message: "Email or phone and password required" });
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			return res.status(400).json({ errors: errors.array() });
 		}
 
-		const user = await userModel.findOne(email ? { email } : { phone });
+		const { email, phone, password } = req.body;
+		const user = await userModel
+			.findOne(email ? { email } : { phone })
+			.select("+password");
+
 		if (!user) {
 			return res.status(401).json({ message: "Invalid email or password" });
 		}
@@ -104,29 +115,38 @@ export async function UserLogin(req, res) {
 
 export async function UserLogout(req, res) {
 	try {
-		const token =
-			req.cookies?.token_user || req.headers.authorization?.split(" ")[1];
+		const token = extractToken(req);
 
 		if (token) {
-			await BlacklistToken.create({ token });
+			try {
+				await BlacklistToken.create({ token });
+			} catch (err) {
+				if (err.code !== 11000) {
+					console.error("BlacklistToken create error:", err);
+					return res.status(500).json({ message: "Internal server error" });
+				}
+			}
 		}
 
 		res.clearCookie("token_user", {
 			httpOnly: true,
 			secure: process.env.NODE_ENV === "production",
 			sameSite: "strict",
+			path: "/",
 		});
 
 		return res.status(200).json({ message: "Logout successful" });
 	} catch (error) {
+		console.error("UserLogout general error:", error);
 		return res.status(500).json({ message: "Internal server error" });
 	}
 }
 
 export async function UserProfile(req, res) {
 	try {
-		return res.status(200).json(req.user);
+		return res.status(200).json({ user: req.user });
 	} catch (error) {
 		return res.status(500).json({ message: "Internal server error" });
 	}
 }
+
