@@ -21,14 +21,14 @@ router.post(
 	],
 	UserRegister
 );
+
 router.post(
 	"/login",
 	[
 		body("password").notEmpty().withMessage("Password is required"),
 		body().custom((value, { req }) => {
-			if (!req.body.email && !req.body.phone) {
+			if (!req.body.email && !req.body.phone)
 				throw new Error("Email or phone is required");
-			}
 			return true;
 		}),
 		body("email").optional().isEmail().withMessage("Invalid email"),
@@ -36,7 +36,7 @@ router.post(
 	],
 	UserLogin
 );
-router.get("/logout", UserAuthMiddleware, UserLogout);
-router.get("/profile", UserAuthMiddleware, UserProfile);
 
+router.get("/logout", UserLogout);
+router.get("/profile", UserAuthMiddleware, UserProfile);
 export default router;

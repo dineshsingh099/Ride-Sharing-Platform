@@ -7,6 +7,8 @@ connectDB();
 
 const server = http.createServer(app);
 
-server.listen(3001,()=>{
-    console.log('Auth service is running on port 3001');
+const Port = process.env.PORT || 3000;
+
+server.listen(Port,()=>{
+    console.log(`Auth service is running on port ${Port}`);
 });
