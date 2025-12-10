@@ -1,6 +1,16 @@
 import express from "express";
 import { body } from "express-validator";
-import { UserRegister, UserLogin, UserLogout, UserProfile } from "../controllers/user.controller.js";
+import {
+	UserRegister,
+	UserLogin,
+	UserLogout,
+	UserProfile,
+	sendVerifyOtp,
+	verifyUserAccount,
+	resendVerifyOtp,
+	sendResetOtp,
+	resetUserPassword
+} from "../controllers/user.controller.js";
 import { UserAuthMiddleware } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
@@ -37,6 +47,12 @@ router.post(
 	UserLogin
 );
 
-router.get("/logout", UserLogout);
+router.get("/logout", UserAuthMiddleware, UserLogout);
 router.get("/profile", UserAuthMiddleware, UserProfile);
+router.post("/send-verify-otp", UserAuthMiddleware, sendVerifyOtp);
+router.post("/resend-verify-otp", UserAuthMiddleware, resendVerifyOtp);
+router.post("/verify-account", UserAuthMiddleware, verifyUserAccount);
+router.post("/send-reset-otp", sendResetOtp);
+router.post("/reset-password", resetUserPassword);
+
 export default router;
