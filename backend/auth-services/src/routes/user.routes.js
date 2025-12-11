@@ -47,7 +47,7 @@ router.post(
 	UserLogin
 );
 
-router.get("/logout", UserAuthMiddleware, UserLogout);
+router.post("/logout", UserAuthMiddleware, UserLogout);
 router.get("/profile", UserAuthMiddleware, UserProfile);
 router.post("/send-verify-otp", UserAuthMiddleware, sendVerifyOtp);
 router.post("/resend-verify-otp", UserAuthMiddleware, resendVerifyOtp);

@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import userModel from "../models/user.model.js";
 import BlacklistToken from "../models/blacklistToken.js";
 import { extractToken } from "../utils/extractToken.js";
+import AdminModel from "../models/admin.model.js";
 
 export async function UserAuthMiddleware(req, res, next) {
 	try {
@@ -26,6 +27,35 @@ export async function UserAuthMiddleware(req, res, next) {
 		if (!user) return res.status(401).json({ message: "Unauthorized" });
 
 		req.user = user.toObject();
+		next();
+	} catch (err) {
+		return res.status(401).json({ message: "Unauthorized" });
+	}
+}
+
+export async function AdminAuthMiddleware(req, res, next) {
+	try {
+		const token = extractToken(req);
+		
+		if (!token) return res.status(401).json({ message: "Unauthorized" });
+		
+		const isBlacklisted = await BlacklistToken.findOne({ token });
+		if (isBlacklisted) return res.status(401).json({ message: "Unauthorized" });
+
+		if (!process.env.JWT_SECRET)
+			return res.status(500).json({ message: "Server misconfiguration" });
+
+		let decoded;
+		try {
+			decoded = jwt.verify(token, process.env.JWT_SECRET);
+		} catch (err) {
+			return res.status(401).json({ message: "Unauthorized" });
+		}
+
+		const admin = await AdminModel.findById(decoded.id).select("-password");
+		if (!admin) return res.status(401).json({ message: "Unauthorized" });
+
+		req.admin = admin.toObject();
 		next();
 	} catch (err) {
 		return res.status(401).json({ message: "Unauthorized" });

@@ -1,5 +1,5 @@
 export function extractToken(req) {
-	const cookieToken = req.cookies?.token_user;
+	const cookieToken = req.cookies?.token_user || req.cookies?.token_admin;
 	if (cookieToken) return cookieToken;
 	const auth = req.headers?.authorization;
 	if (!auth) return null;
