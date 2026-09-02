@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser'
 
 import authRoutes from "./routes/user.routes"
 import partnerRoutes from "./routes/partner.routes"
+import adminRoutes from "./routes/admin.routes"
 
 const app = express()
 app.use(helmet());
@@ -27,6 +28,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/user", authRoutes);
 app.use("/api/partner", partnerRoutes);
+app.use("/api/admin", adminRoutes);
 
 
 export default app

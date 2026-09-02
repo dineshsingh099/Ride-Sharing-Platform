@@ -8,6 +8,7 @@ const api = axios.create({
 const refreshState = {
 	user: { isRefreshing: false, queue: [] },
 	partner: { isRefreshing: false, queue: [] },
+	admin: { isRefreshing: false, queue: [] },
 };
 
 const processQueue = (role, error) => {
@@ -33,9 +34,11 @@ api.interceptors.response.use(
 			!originalRequest.url.includes("/refresh-token") &&
 			!originalRequest.url.includes("/google")
 		) {
-			const role = originalRequest.url.includes("/partner")
-				? "partner"
-				: "user";
+			const role = originalRequest.url.includes("/admin")
+				? "admin"
+				: originalRequest.url.includes("/partner")
+					? "partner"
+					: "user";
 			const state = refreshState[role];
 
 			if (state.isRefreshing) {

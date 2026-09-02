@@ -26,7 +26,7 @@ export const generateRefreshToken = (payload: TokenPayload) => {
 
 export const setAuthCookies = (
 	res: Response,
-	role: "user" | "partner",
+	role: "user" | "partner" | "admin",
 	accessToken: string,
 	refreshToken: string,
 ) => {
@@ -45,7 +45,7 @@ export const setAuthCookies = (
 	});
 };
 
-export const clearAuthCookies = (res: Response, role: "user" | "partner") => {
+export const clearAuthCookies = (res: Response, role: "user" | "partner" | "admin") => {
 	res.clearCookie(`${role}AccessToken`);
 	res.clearCookie(`${role}RefreshToken`);
 };

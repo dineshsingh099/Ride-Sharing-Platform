@@ -84,11 +84,6 @@ export default function GoogleAuthButton({
 
 		async function renderGoogleButton() {
 			try {
-				console.log("[DEBUG] Current origin:", window.location.origin);
-				console.log(
-					"[DEBUG] Client ID being used:",
-					import.meta.env.VITE_GOOGLE_CLIENT_ID,
-				);
 				await loadGoogleScript();
 
 				if (cancelled || !containerRef.current) {

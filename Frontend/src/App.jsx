@@ -21,6 +21,8 @@ const UserDashboard = lazy(() => import("./pages/dashboard/UserDashboard"));
 const PartnerDashboard = lazy(() =>
 	import("./pages/dashboard/PartnerDashboard"),
 );
+const AdminLogin = lazy(() => import("./pages/auth/AdminLogin"));
+const AdminDashboard = lazy(() => import("./pages/dashboard/AdminDashboard"));
 
 function PageFallback() {
 	return (
@@ -77,6 +79,8 @@ function App() {
 						</RequireOnboardingComplete>
 					}
 				/>
+				<Route path="/admin/login" element={<AdminLogin />} />
+				<Route path="/admin/dashboard" element={<AdminDashboard />} />
 				<Route path="*" element={<NotFound />} />
 			</Routes>
 		</Suspense>

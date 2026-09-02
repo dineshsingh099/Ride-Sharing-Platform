@@ -14,7 +14,7 @@ export const registerValidation = [
 		.withMessage("Email address is required")
 		.isEmail()
 		.withMessage("Please enter a valid email address")
-		.normalizeEmail(),
+		.toLowerCase(),
 	body("password")
 		.notEmpty()
 		.withMessage("Password is required")
@@ -30,7 +30,7 @@ export const loginValidation = [
 		.withMessage("Email address is required")
 		.isEmail()
 		.withMessage("Please enter a valid email address")
-		.normalizeEmail(),
+		.toLowerCase(),
 	body("password").notEmpty().withMessage("Password is required"),
 	validate,
 ];
@@ -42,7 +42,7 @@ export const verifyOtpValidation = [
 		.withMessage("Email address is required")
 		.isEmail()
 		.withMessage("Please enter a valid email address")
-		.normalizeEmail(),
+		.toLowerCase(),
 	body("otp")
 		.trim()
 		.notEmpty()
@@ -59,6 +59,6 @@ export const resendOtpValidation = [
 		.withMessage("Email address is required")
 		.isEmail()
 		.withMessage("Please enter a valid email address")
-		.normalizeEmail(),
+		.toLowerCase(),
 	validate,
 ];

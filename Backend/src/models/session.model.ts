@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 
 export interface ISession extends Document {
 	userId: Types.ObjectId;
-	role: "user" | "partner";
+	role: "user" | "partner" | "admin";
 	token: string;
 
 	device?: string;
@@ -20,7 +20,7 @@ export interface ISession extends Document {
 interface ISessionModel extends Model<ISession> {
 	findMatchingSession(
 		userId: string,
-		role: "user" | "partner",
+		role: "user" | "partner" | "admin",
 		candidateToken: string,
 	): Promise<ISession | null>;
 }
@@ -34,7 +34,7 @@ const sessionSchema = new mongoose.Schema<ISession>(
 		},
 		role: {
 			type: String,
-			enum: ["user", "partner"],
+			enum: ["user", "partner", "admin"],
 			required: true,
 		},
 		token: {
@@ -85,7 +85,7 @@ sessionSchema.methods.compareToken = async function (
 
 sessionSchema.statics.findMatchingSession = async function (
 	userId: string,
-	role: "user" | "partner",
+	role: "user" | "partner" | "admin",
 	candidateToken: string,
 ) {
 	const sessions = await this.find({ userId, role });

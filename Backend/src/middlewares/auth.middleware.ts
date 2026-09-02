@@ -14,7 +14,7 @@ declare global {
 	}
 }
 
-export function authenticate(role: "user" | "partner") {
+export function authenticate(role: "user" | "partner" | "admin") {
 	return function (req: Request, res: Response, next: NextFunction) {
 		const token = req.cookies?.[`${role}AccessToken`];
 		if (!token) {
