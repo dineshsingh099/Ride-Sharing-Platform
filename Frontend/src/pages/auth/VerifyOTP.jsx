@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { userService } from "../../services/userServices";
 import { partnerService } from "../../services/partnerServices";
 import { extractErrorMessage } from "../../utils/errorHandler";
-import FormError from "../../components/FormError";
+import FormError from "../../components/common/FormError";
 
 export default function VerifyOTP() {
 	const navigate = useNavigate();

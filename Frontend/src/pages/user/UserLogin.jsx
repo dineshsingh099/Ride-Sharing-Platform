@@ -1,34 +1,26 @@
-import {
-	ArrowLeft,
-	User,
-	Mail,
-	Lock,
-	Eye,
-	EyeOff,
-	Loader2,
-} from "lucide-react";
+import { ArrowLeft, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import { lazy, Suspense, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { partnerService } from "../../services/partnerServices";
+import { userService } from "../../services/userServices";
 import { extractErrorMessage } from "../../utils/errorHandler";
-import { getPartnerPostAuthRedirect } from "../../utils/onboardingRedirect";
-import FormError from "../../components/FormError";
+import FormError from "../../components/common/FormError";
 
-const GoogleAuthButton = lazy(() => import("../../components/GoogleAuthButton"));
+const GoogleAuthButton = lazy(
+	() => import("../../components/common/GoogleAuthButton"),
+);
 
-export default function PartnerSignup() {
+export default function UserLogin() {
 	const navigate = useNavigate();
 	const [showPassword, setShowPassword] = useState(false);
-	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
 
-	const handleSignup = async () => {
+	const handleLogin = async () => {
 		setError("");
 
-		if (!name.trim() || !email.trim() || !password) {
+		if (!email.trim() || !password) {
 			setError("Please fill in all fields");
 			return;
 		}
@@ -36,19 +28,22 @@ export default function PartnerSignup() {
 		setLoading(true);
 
 		try {
-			const data = await partnerService.register(
-				name.trim(),
-				email.trim(),
-				password,
-			);
-			navigate("/verify-otp", {
-				state: {
-					email: email.trim(),
-					role: "partner",
-					retryAfter: data?.retryAfter ?? 60,
-				},
-			});
+			await userService.login(email.trim(), password);
+			navigate("/dashboard", { replace: true });
 		} catch (err) {
+			if (
+				err.response?.status === 403 &&
+				err.response?.data?.isEmailVerified === false
+			) {
+				navigate("/verify-otp", {
+					state: {
+						email: email.trim(),
+						role: "user",
+						retryAfter: 60,
+					},
+				});
+				return;
+			}
 			setError(extractErrorMessage(err));
 		} finally {
 			setLoading(false);
@@ -60,9 +55,8 @@ export default function PartnerSignup() {
 		setLoading(true);
 
 		try {
-			await partnerService.googleLogin(credential, nonce);
-			const redirectTo = await getPartnerPostAuthRedirect();
-			navigate(redirectTo, { replace: true });
+			await userService.googleLogin(credential, nonce);
+			navigate("/dashboard", { replace: true });
 		} catch (err) {
 			setError(extractErrorMessage(err));
 		} finally {
@@ -85,10 +79,10 @@ export default function PartnerSignup() {
 					<ArrowLeft size={17} className="text-violet-200" />
 				</Link>
 
-				<h1 className="mt-5 text-3xl font-bold text-white">Partner Signup</h1>
+				<h1 className="mt-5 text-3xl font-bold text-white">Welcome Back</h1>
 
 				<p className="text-gray-400 mt-2 mb-6">
-					Join RideX as a Driver Partner and start earning today.
+					Login to continue your RideX journey.
 				</p>
 
 				<Suspense
@@ -97,7 +91,7 @@ export default function PartnerSignup() {
 					}
 				>
 					<GoogleAuthButton
-						getNonce={partnerService.getGoogleNonce}
+						getNonce={userService.getGoogleNonce}
 						onCredential={handleGoogleCredential}
 						onError={(msg) => setError(msg)}
 						disabled={loading}
@@ -113,18 +107,6 @@ export default function PartnerSignup() {
 				</div>
 
 				<div className="space-y-4">
-					<div className="relative">
-						<User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-violet-400" />
-						<input
-							type="text"
-							value={name}
-							onChange={(e) => setName(e.target.value)}
-							placeholder="Full Name"
-							disabled={loading}
-							className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#1A1A24] border border-violet-500/20 text-white placeholder-gray-500 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-500/20 transition-all disabled:opacity-50"
-						/>
-					</div>
-
 					<div className="relative">
 						<Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-violet-400" />
 						<input
@@ -157,25 +139,34 @@ export default function PartnerSignup() {
 					</div>
 				</div>
 
+				<div className="flex justify-end mt-3">
+					<Link
+						to="/forgot-password"
+						className="text-sm text-violet-300 hover:text-white transition-colors"
+					>
+						Forgot Password?
+					</Link>
+				</div>
+
 				<FormError message={error} />
 
 				<button
 					type="button"
-					onClick={handleSignup}
+					onClick={handleLogin}
 					disabled={loading}
 					className="w-full mt-2 py-3 rounded-xl font-bold text-white bg-linear-to-r from-violet-500 to-blue-500 hover:from-violet-400 hover:to-blue-400 transition-all duration-300 shadow-lg shadow-violet-500/30 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
 				>
 					{loading && <Loader2 size={18} className="animate-spin" />}
-					{loading ? "Creating account..." : "Become a Partner"}
+					{loading ? "Logging in..." : "Login"}
 				</button>
 
 				<p className="text-center text-gray-400 mt-6">
-					Already have a partner account?{" "}
+					Don't have an account?{" "}
 					<Link
-						to="/partner/login"
+						to="/signup"
 						className="text-violet-300 hover:text-white font-semibold transition-colors"
 					>
-						Login
+						Sign Up
 					</Link>
 				</p>
 			</div>

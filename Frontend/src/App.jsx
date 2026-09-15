@@ -1,28 +1,28 @@
 import { Suspense, lazy } from "react";
 import { Routes, Route } from "react-router-dom";
 import Landing from "./pages/Landing";
-import OnboardingGuard from "./components/OnboardingGuard";
-import RequireOnboardingComplete from "./components/RequireOnboardingComplete";
+import OnboardingGuard from "./components/guards/OnboardingGuard";
+import RequireOnboardingComplete from "./components/guards/RequireOnboardingComplete";
 
-const UserLogin = lazy(() => import("./pages/auth/UserLogin"));
-const UserSignup = lazy(() => import("./pages/auth/UserSignup"));
-const PartnerLogin = lazy(() => import("./pages/auth/PartnerLogin"));
-const PartnerSignup = lazy(() => import("./pages/auth/PartnerSignup"));
-const VerityOTP = lazy(() => import("./pages/auth/VeriftyOTP"));
+const UserLogin = lazy(() => import("./pages/user/UserLogin"));
+const UserSignup = lazy(() => import("./pages/user/UserSignup"));
+const PartnerLogin = lazy(() => import("./pages/partner/PartnerLogin"));
+const PartnerSignup = lazy(() => import("./pages/partner/PartnerSignup"));
+const VerityOTP = lazy(() => import("./pages/auth/VerifyOTP"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const PartnerVehicleDetails = lazy(() =>
-	import("./pages/onboarding/PartnerVehicleDetails"),
+	import("./pages/partner/onboarding/PartnerVehicleDetails"),
 );
-const PartnerDocs = lazy(() => import("./pages/onboarding/PartnerDocs"));
+const PartnerDocs = lazy(() => import("./pages/partner/onboarding/PartnerDocs"));
 const PartnerBankDetails = lazy(() =>
-	import("./pages/onboarding/PartnerBankDetails"),
+	import("./pages/partner/onboarding/PartnerBankDetails"),
 );
-const UserDashboard = lazy(() => import("./pages/dashboard/UserDashboard"));
+const UserDashboard = lazy(() => import("./pages/user/UserDashboard"));
 const PartnerDashboard = lazy(() =>
-	import("./pages/dashboard/PartnerDashboard"),
+	import("./pages/partner/PartnerDashboard"),
 );
-const AdminLogin = lazy(() => import("./pages/auth/AdminLogin"));
-const AdminDashboard = lazy(() => import("./pages/dashboard/AdminDashboard"));
+const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 
 function PageFallback() {
 	return (

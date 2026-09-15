@@ -4,9 +4,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { partnerService } from "../../services/partnerServices";
 import { extractErrorMessage } from "../../utils/errorHandler";
 import { getPartnerPostAuthRedirect } from "../../utils/onboardingRedirect";
-import FormError from "../../components/FormError";
+import FormError from "../../components/common/FormError";
 
-const GoogleAuthButton = lazy(() => import("../../components/GoogleAuthButton"));
+const GoogleAuthButton = lazy(() => import("../../components/common/GoogleAuthButton"));
 
 export default function PartnerLogin() {
 	const navigate = useNavigate();

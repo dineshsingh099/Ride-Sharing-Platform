@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { adminService } from "../../services/adminServices";
 import { extractErrorMessage } from "../../utils/errorHandler";
-import FormError from "../../components/FormError";
+import FormError from "../../components/common/FormError";
 
 export default function AdminLogin() {
 	const navigate = useNavigate();

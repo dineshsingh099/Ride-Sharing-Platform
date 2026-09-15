@@ -1,32 +1,32 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { Loader2, LogOut, ShieldCheck } from "lucide-react";
+import { Loader2, LogOut } from "lucide-react";
 import { useGetMe } from "../../hooks/useGetMe";
-import { adminService } from "../../services/adminServices";
-import { clearAdmin } from "../../redux/adminSlice";
-import ProfileAvatar from "../../components/ProfileAvatar";
+import { partnerService } from "../../services/partnerServices";
+import { clearPartner } from "../../redux/partnerSlice";
+import ProfileAvatar from "../../components/common/ProfileAvatar";
 
-export default function AdminDashboard() {
+export default function PartnerDashboard() {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
-	const { me, loading, error } = useGetMe("admin");
+	const { me, loading, error } = useGetMe("partner");
 	const [loggingOut, setLoggingOut] = useState(false);
 
 	useEffect(() => {
 		if (!loading && !me) {
-			navigate("/admin/login", { replace: true });
+			navigate("/partner/login", { replace: true });
 		}
 	}, [loading, me, navigate]);
 
 	const handleLogout = async () => {
 		setLoggingOut(true);
 		try {
-			await adminService.logout();
+			await partnerService.logout();
 		} finally {
-			dispatch(clearAdmin());
+			dispatch(clearPartner());
 			setLoggingOut(false);
-			navigate("/admin/login", { replace: true });
+			navigate("/partner/login", { replace: true });
 		}
 	};
 
@@ -45,15 +45,12 @@ export default function AdminDashboard() {
 	return (
 		<div className="min-h-screen bg-[#0A0A0D]">
 			<div className="flex items-center justify-between px-6 lg:px-10 h-20 border-b border-white/5">
-				<div className="flex items-center gap-2">
-					<ShieldCheck size={20} className="text-violet-400" />
-					<span className="text-white text-xl font-extrabold tracking-tight">
-						Admin
-						<span className="text-transparent bg-clip-text bg-linear-to-r from-violet-400 to-blue-400">
-							Panel
-						</span>
+				<span className="text-white text-xl font-extrabold tracking-tight">
+					Ride
+					<span className="text-transparent bg-clip-text bg-linear-to-r from-violet-400 to-blue-400">
+						X
 					</span>
-				</div>
+				</span>
 				<ProfileAvatar name={me.name} avatar={me.avatar} size={42} />
 			</div>
 
@@ -80,7 +77,7 @@ export default function AdminDashboard() {
 
 					<div className="mt-6 space-y-2 text-gray-300">
 						<p>Email: {me.email}</p>
-						<p>Role: {me.role}</p>
+						<p>Account verified: {me.isEmailVerified ? "Yes" : "No"}</p>
 					</div>
 
 					{error && <p className="mt-4 text-sm text-red-400">{error}</p>}

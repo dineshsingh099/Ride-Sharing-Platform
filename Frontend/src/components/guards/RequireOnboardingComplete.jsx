@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { partnerService } from "../services/partnerServices";
+import { partnerService } from "../../services/partnerServices";
 
 const stepPaths = {
 	0: "/onboarding/vehicle",

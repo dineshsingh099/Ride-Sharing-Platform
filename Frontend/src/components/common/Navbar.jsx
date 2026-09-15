@@ -8,7 +8,7 @@ import {
 	HiOutlinePhone,
 	HiOutlineInformationCircle,
 } from "react-icons/hi2";
-import { useSessionUser } from "../hooks/useSessionUser";
+import { useSessionUser } from "../../hooks/useSessionUser";
 import ProfileAvatar from "./ProfileAvatar";
 
 const navLinks = [

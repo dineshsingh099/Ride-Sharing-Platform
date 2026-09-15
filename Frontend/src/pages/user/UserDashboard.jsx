@@ -5,7 +5,7 @@ import { Loader2, LogOut } from "lucide-react";
 import { useGetMe } from "../../hooks/useGetMe";
 import { userService } from "../../services/userServices";
 import { clearUser } from "../../redux/userSlice";
-import ProfileAvatar from "../../components/ProfileAvatar";
+import ProfileAvatar from "../../components/common/ProfileAvatar";
 
 export default function UserDashboard() {
 	const navigate = useNavigate();

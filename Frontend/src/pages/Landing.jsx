@@ -1,12 +1,12 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import Navbar from "../components/Navbar";
+import Navbar from "../components/common/Navbar";
 import Hero from "../components/sections/Hero";
 import About from "../components/sections/About";
 import Services from "../components/sections/Services";
 import HowItWorks from "../components/sections/HowItWorks";
 import Contact from "../components/sections/Contact";
-import Footer from "../components/Footer";
+import Footer from "../components/common/Footer";
 
 export default function Landing() {
 	const location = useLocation();
