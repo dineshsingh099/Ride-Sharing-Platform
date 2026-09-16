@@ -66,17 +66,6 @@ export default function PartnerVehicleDetails() {
 			<div className="absolute bottom-20 right-10 w-56 h-56 bg-blue-600/20 rounded-full blur-[120px]" />
 
 			<div className="relative z-10 w-full max-w-md">
-				<div className="flex items-center justify-between px-1 mb-2">
-					<span className="text-xs uppercase tracking-widest text-violet-400 font-semibold">
-						Partner Onboarding
-					</span>
-					<span className="text-xs text-gray-500">Step 1 of 3</span>
-				</div>
-
-				<div className="h-1 rounded-full bg-[#1A1A24] overflow-hidden mb-4">
-					<div className="h-full w-1/3 rounded-full bg-linear-to-r from-violet-500 to-blue-500" />
-				</div>
-
 				<div className="bg-[#111118]/95 backdrop-blur-xl border border-violet-500/20 rounded-3xl p-7 shadow-2xl shadow-violet-900/30">
 					<Link
 						to="/partner/signup"
@@ -189,12 +178,6 @@ export default function PartnerVehicleDetails() {
 						{loading && <Loader2 size={18} className="animate-spin" />}
 						{loading ? "Saving..." : "Continue"}
 					</button>
-
-					<div className="flex items-center justify-center gap-1.5 mt-6">
-						<div className="w-8 h-1 rounded-full bg-linear-to-r from-violet-500 to-blue-500" />
-						<div className="w-8 h-1 rounded-full bg-[#282832]" />
-						<div className="w-8 h-1 rounded-full bg-[#282832]" />
-					</div>
 				</div>
 			</div>
 		</div>
