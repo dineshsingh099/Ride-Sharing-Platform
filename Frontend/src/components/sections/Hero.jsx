@@ -1,10 +1,71 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { ChevronDown } from "lucide-react";
+import { userService } from "../../services/userServices";
+import { partnerService } from "../../services/partnerServices";
+import { setUserData } from "../../redux/userSlice";
+import { setPartnerData } from "../../redux/partnerSlice";
+import { getPartnerPostAuthRedirect } from "../../utils/onboardingRedirect";
 
 export default function Hero() {
+	const navigate = useNavigate();
+	const dispatch = useDispatch();
+	const userData = useSelector((state) => state.user.userData);
+	const partnerData = useSelector((state) => state.partner.partnerData);
+	const [busy, setBusy] = useState(false);
+
 	const handleScrollDown = () => {
 		const servicesSection = document.getElementById("about");
 		if (servicesSection) {
 			servicesSection.scrollIntoView({ behavior: "smooth" });
+		}
+	};
+
+	const handleBookRide = async () => {
+		if (busy) return;
+		setBusy(true);
+		try {
+			let currentUser = userData;
+			if (!currentUser) {
+				try {
+					const res = await userService.getCurrentUser();
+					currentUser = res?.user || null;
+					if (currentUser) dispatch(setUserData(currentUser));
+				} catch {
+					currentUser = null;
+				}
+			}
+			navigate(currentUser ? "/dashboard" : "/login");
+		} finally {
+			setBusy(false);
+		}
+	};
+
+	const handleBecomePartner = async () => {
+		if (busy) return;
+		setBusy(true);
+		try {
+			let currentPartner = partnerData;
+			if (!currentPartner) {
+				try {
+					const res = await partnerService.getCurrentPartner();
+					currentPartner = res?.partner || null;
+					if (currentPartner) dispatch(setPartnerData(currentPartner));
+				} catch {
+					currentPartner = null;
+				}
+			}
+
+			if (!currentPartner) {
+				navigate("/partner/login");
+				return;
+			}
+
+			const path = await getPartnerPostAuthRedirect();
+			navigate(path);
+		} finally {
+			setBusy(false);
 		}
 	};
 
@@ -38,12 +99,20 @@ export default function Hero() {
 				</p>
 
 				<div className="mt-8 flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto px-4 sm:px-0">
-					<button className="relative overflow-hidden group/hero w-full sm:w-auto px-7 py-3 rounded-xl text-[15px] font-bold text-white bg-linear-to-r from-violet-500 to-blue-500 hover:from-violet-400 hover:to-blue-400 shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50 ring-1 ring-white/10 transition-all duration-300">
+					<button
+						onClick={handleBookRide}
+						disabled={busy}
+						className="relative overflow-hidden group/hero w-full sm:w-auto px-7 py-3 rounded-xl text-[15px] font-bold text-white bg-linear-to-r from-violet-500 to-blue-500 hover:from-violet-400 hover:to-blue-400 shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50 ring-1 ring-white/10 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
+					>
 						<span className="relative z-10">Book a Ride</span>
 						<span className="absolute inset-0 -translate-x-full group-hover/hero:translate-x-full transition-transform duration-700 ease-in-out bg-linear-to-r from-transparent via-white/40 to-transparent skew-x-12" />
 					</button>
 
-					<button className="w-full sm:w-auto px-7 py-3 rounded-xl text-[15px] font-semibold text-violet-100 bg-violet-500/15 border border-violet-400/40 hover:bg-violet-500/25 hover:border-violet-400/70 hover:text-white transition-all duration-300">
+					<button
+						onClick={handleBecomePartner}
+						disabled={busy}
+						className="w-full sm:w-auto px-7 py-3 rounded-xl text-[15px] font-semibold text-violet-100 bg-violet-500/15 border border-violet-400/40 hover:bg-violet-500/25 hover:border-violet-400/70 hover:text-white transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
+					>
 						Become a Partner
 					</button>
 				</div>

@@ -4,6 +4,7 @@ import {
 	UserRound,
 	Hash,
 	Phone,
+	AtSign,
 	Loader2,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -12,26 +13,70 @@ import { partnerService } from "../../../services/partnerServices";
 import { extractErrorMessage } from "../../../utils/errorHandler";
 import FormError from "../../../components/common/FormError";
 
+const IFSC_REGEX = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+const ACCOUNT_REGEX = /^\d{9,18}$/;
+const PHONE_REGEX = /^[6-9]\d{9}$/;
+const UPI_REGEX = /^[a-zA-Z0-9._-]{2,256}@[a-zA-Z]{2,64}$/;
+
+const inputClass =
+	"w-full pl-12 pr-4 py-3 rounded-xl bg-[#1A1A24] border border-violet-500/20 text-white placeholder-gray-500 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-500/20 transition-all disabled:opacity-50";
+
 export default function PartnerBankDetails() {
 	const navigate = useNavigate();
-	const [accountHolderName, setAccountHolderName] = useState("");
-	const [accountNumber, setAccountNumber] = useState("");
-	const [ifscCode, setIfscCode] = useState("");
-	const [phoneNumber, setPhoneNumber] = useState("");
-	const [upiId, setUpiId] = useState("");
+	const [form, setForm] = useState({
+		accountHolderName: "",
+		accountNumber: "",
+		ifscCode: "",
+		phoneNumber: "",
+		upiId: "",
+	});
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
 
+	const name = form.accountHolderName.trim();
+	const account = form.accountNumber.trim();
+	const ifsc = form.ifscCode.trim().toUpperCase();
+	const phone = form.phoneNumber.trim();
+	const upi = form.upiId.trim();
+
+	const fieldErrors = {
+		accountHolderName:
+			name.length >= 3
+				? ""
+				: "Enter the account holder name (min 3 characters)",
+		accountNumber: ACCOUNT_REGEX.test(account)
+			? ""
+			: "Account number must be 9 to 18 digits",
+		ifscCode: IFSC_REGEX.test(ifsc)
+			? ""
+			: "Enter a valid IFSC code (e.g. SBIN0001234)",
+		phoneNumber: PHONE_REGEX.test(phone)
+			? ""
+			: "Enter a valid 10 digit mobile number",
+		upiId:
+			!upi || UPI_REGEX.test(upi) ? "" : "Enter a valid UPI ID (e.g. name@upi)",
+	};
+
+	const canSubmit = Object.values(fieldErrors).every((msg) => !msg);
+
+	const updateField = (key, value) => {
+		setError("");
+		setForm((prev) => ({ ...prev, [key]: value }));
+	};
+
+	const showError = (key) => form[key].trim() !== "" && fieldErrors[key];
+
 	const handleSubmit = async () => {
+		if (loading) return;
 		setError("");
 
-		if (
-			!accountHolderName.trim() ||
-			!accountNumber.trim() ||
-			!ifscCode.trim() ||
-			!phoneNumber.trim()
-		) {
-			setError("Please fill in all required fields");
+		if (!canSubmit) {
+			const hasEmptyRequired = !name || !account || !ifsc || !phone;
+			setError(
+				hasEmptyRequired
+					? "Please fill in all required fields"
+					: "Please correct the errors above",
+			);
 			return;
 		}
 
@@ -39,11 +84,11 @@ export default function PartnerBankDetails() {
 
 		try {
 			await partnerService.submitBankDetails({
-				accountHolderName: accountHolderName.trim(),
-				accountNumber: accountNumber.trim(),
-				ifscCode: ifscCode.trim().toUpperCase(),
-				phoneNumber: phoneNumber.trim(),
-				upiId: upiId.trim() || undefined,
+				accountHolderName: name,
+				accountNumber: account,
+				ifscCode: ifsc,
+				phoneNumber: phone,
+				upiId: upi || undefined,
 			});
 			navigate("/partner/dashboard", { replace: true });
 		} catch (err) {
@@ -76,66 +121,123 @@ export default function PartnerBankDetails() {
 					</p>
 
 					<div className="space-y-4">
-						<div className="relative">
-							<UserRound className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-violet-400" />
-							<input
-								type="text"
-								value={accountHolderName}
-								onChange={(e) => setAccountHolderName(e.target.value)}
-								placeholder="Account Holder Name"
-								disabled={loading}
-								className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#1A1A24] border border-violet-500/20 text-white placeholder-gray-500 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-500/20 transition-all disabled:opacity-50"
-							/>
+						<div>
+							<div className="relative">
+								<UserRound className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-violet-400" />
+								<input
+									type="text"
+									value={form.accountHolderName}
+									onChange={(e) =>
+										updateField("accountHolderName", e.target.value)
+									}
+									placeholder="Account Holder Name"
+									disabled={loading}
+									className={inputClass}
+								/>
+							</div>
+							{showError("accountHolderName") && (
+								<p className="mt-1.5 text-xs text-red-400">
+									{fieldErrors.accountHolderName}
+								</p>
+							)}
 						</div>
 
-						<div className="relative">
-							<CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-violet-400" />
-							<input
-								type="text"
-								inputMode="numeric"
-								value={accountNumber}
-								onChange={(e) => setAccountNumber(e.target.value)}
-								placeholder="Account Number"
-								disabled={loading}
-								className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#1A1A24] border border-violet-500/20 text-white placeholder-gray-500 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-500/20 transition-all disabled:opacity-50"
-							/>
+						<div>
+							<div className="relative">
+								<CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-violet-400" />
+								<input
+									type="text"
+									inputMode="numeric"
+									maxLength={18}
+									value={form.accountNumber}
+									onChange={(e) =>
+										updateField(
+											"accountNumber",
+											e.target.value.replace(/\D/g, ""),
+										)
+									}
+									placeholder="Account Number"
+									disabled={loading}
+									className={inputClass}
+								/>
+							</div>
+							{showError("accountNumber") && (
+								<p className="mt-1.5 text-xs text-red-400">
+									{fieldErrors.accountNumber}
+								</p>
+							)}
 						</div>
 
-						<div className="relative">
-							<Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-violet-400" />
-							<input
-								type="text"
-								value={ifscCode}
-								onChange={(e) => setIfscCode(e.target.value)}
-								placeholder="IFSC Code (e.g. SBIN0001234)"
-								disabled={loading}
-								className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#1A1A24] border border-violet-500/20 text-white placeholder-gray-500 uppercase focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-500/20 transition-all disabled:opacity-50"
-							/>
+						<div>
+							<div className="relative">
+								<Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-violet-400" />
+								<input
+									type="text"
+									maxLength={11}
+									value={form.ifscCode}
+									onChange={(e) =>
+										updateField(
+											"ifscCode",
+											e.target.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase(),
+										)
+									}
+									placeholder="IFSC Code (e.g. SBIN0001234)"
+									disabled={loading}
+									className={`${inputClass} uppercase placeholder:normal-case`}
+								/>
+							</div>
+							{showError("ifscCode") && (
+								<p className="mt-1.5 text-xs text-red-400">
+									{fieldErrors.ifscCode}
+								</p>
+							)}
 						</div>
 
-						<div className="relative">
-							<Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-violet-400" />
-							<input
-								type="tel"
-								inputMode="numeric"
-								value={phoneNumber}
-								onChange={(e) => setPhoneNumber(e.target.value)}
-								placeholder="Phone Number"
-								disabled={loading}
-								className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#1A1A24] border border-violet-500/20 text-white placeholder-gray-500 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-500/20 transition-all disabled:opacity-50"
-							/>
+						<div>
+							<div className="relative">
+								<Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-violet-400" />
+								<input
+									type="tel"
+									inputMode="numeric"
+									maxLength={10}
+									value={form.phoneNumber}
+									onChange={(e) =>
+										updateField(
+											"phoneNumber",
+											e.target.value.replace(/\D/g, ""),
+										)
+									}
+									placeholder="Phone Number"
+									disabled={loading}
+									className={inputClass}
+								/>
+							</div>
+							{showError("phoneNumber") && (
+								<p className="mt-1.5 text-xs text-red-400">
+									{fieldErrors.phoneNumber}
+								</p>
+							)}
 						</div>
 
-						<div className="relative">
-							<CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-violet-400" />
-							<input
-								type="text"
-								value={upiId}
-								onChange={(e) => setUpiId(e.target.value)}
-								placeholder="UPI ID (optional, e.g. name@upi)"
-								disabled={loading}
-								className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#1A1A24] border border-violet-500/20 text-white placeholder-gray-500 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-500/20 transition-all disabled:opacity-50"
-							/>
+						<div>
+							<div className="relative">
+								<AtSign className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-violet-400" />
+								<input
+									type="text"
+									value={form.upiId}
+									onChange={(e) =>
+										updateField("upiId", e.target.value.replace(/\s/g, ""))
+									}
+									placeholder="UPI ID (optional, e.g. name@upi)"
+									disabled={loading}
+									className={inputClass}
+								/>
+							</div>
+							{showError("upiId") && (
+								<p className="mt-1.5 text-xs text-red-400">
+									{fieldErrors.upiId}
+								</p>
+							)}
 						</div>
 					</div>
 
